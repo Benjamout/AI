@@ -6,9 +6,11 @@ import pybullet as p
 
 from stable_baselines3 import DQN
 from stable_baselines3.common.monitor import Monitor
+
 from stable_baselines3.common.callbacks import BaseCallback, EvalCallback
 from simple_carpark.envs.simple_carpark_env import SimpleCarparkEnv
 from stable_baselines3.common.utils import get_linear_fn
+from stable_baselines3.common.buffers import ReplayBuffer
 
 
 # ───────────── Environment & model ─────────────
@@ -24,7 +26,8 @@ model = DQN(
     exploration_fraction=0.9,
     exploration_final_eps=0.2,
     train_freq=4,
-    target_update_interval=20_000,
+    target_update_interval=30_000,
+    max_grad_norm=10,
     policy_kwargs={"net_arch": [64, 64]},  # just the MLP architecture, no dueling
     verbose=1,
     tensorboard_log="./carpark_tensorboard/"
@@ -117,7 +120,7 @@ class EvalWithSuccess(EvalCallback):
 eval_env = Monitor(SimpleCarparkEnv(isDiscrete=True, renders=False))
 eval_cb  = EvalWithSuccess(
     eval_env,
-    eval_freq=1_500,
+    eval_freq=2_000,
     n_eval_episodes=10,
     deterministic=True,
     log_path="./carpark_tensorboard/eval",
@@ -126,7 +129,7 @@ eval_cb  = EvalWithSuccess(
 
 # ───────────── Train ────────────────
 model.learn(
-    total_timesteps=150_000,
+    total_timesteps=200_000,
     callback=[success_cb, eval_cb],
     tb_log_name="dqn_with_demos"
 )

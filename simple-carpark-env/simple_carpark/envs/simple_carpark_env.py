@@ -44,8 +44,8 @@ class SimpleCarparkEnv(gym.Env):
         self.car = Car(self._p)
 
         gx, gy = -1.4, -1.1 
-        gx += np.random.uniform(-0.1, 0.1)
-        gy += np.random.uniform(-0.1, 0.1)
+        gx += np.random.choice([-0.1, 0, 0.1])
+        gy += np.random.choice([-0.1, 0, 0.1])
 
         self.goal_pos = None
 
@@ -126,12 +126,12 @@ class SimpleCarparkEnv(gym.Env):
             return np.array(obs, dtype=np.float32), -50, True, False, {"success": False, "oob": True}
 
         # ───── Success: distance & heading tolerance ─────────
-        heading_ok = abs(heading_err) < 0.26                # ±15°
+        heading_ok = abs(heading_err) < 0.26               # ±15° = 0.26
         success    = (dist_to_goal < 0.2) and heading_ok
         r_goal     = 150 if success else 0
 
         # ───── Assemble reward & flags ───────────────────────
-        r_step  = -0.1
+        r_step  = -0.2
         reward  = r_prog + r_align + r_step + r_collision + r_goal
 
         self._step_counter += 1
