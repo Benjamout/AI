@@ -19,18 +19,20 @@ lr_schedule = get_linear_fn(1e-3, 1e-5, 100_000)
 model = DQN(
     "MlpPolicy",
     env,
-    learning_rate=lr_schedule,
-    buffer_size=100_000,
+    learning_rate=1e-3,
+    buffer_size=150_000,
     exploration_fraction=0.9,
     exploration_final_eps=0.2,
     train_freq=4,
+    target_update_interval=20_000,
+    policy_kwargs={"net_arch": [64, 64]},  # just the MLP architecture, no dueling
     verbose=1,
     tensorboard_log="./carpark_tensorboard/"
 )
 
 # ───────────── Seed replay buffer with demos ───────
 data = np.load("demos.npy", allow_pickle=True)
-rb   = model.replay_buffer
+rb = model.replay_buffer
 for obs, action, reward, next_obs, done in data:
     rb.add(
         np.array([obs],      dtype=np.float32),
@@ -69,9 +71,8 @@ class EvalWithSuccess(EvalCallback):
         if self.eval_freq > 0 and self.n_calls % self.eval_freq == 0:
             rewards, lengths, successes = [], [], []
             for _ in range(self.n_eval_episodes):
-                # reset (Gym or Gymnasium signature)
-                out = self.eval_env.reset()
-                obs = out[0] if isinstance(out, tuple) else out
+                reset_out = self.eval_env.reset()
+                obs = reset_out[0] if isinstance(reset_out, tuple) else reset_out
 
                 done = False
                 ep_r, ep_len, ep_succ = 0.0, 0, False
@@ -84,7 +85,6 @@ class EvalWithSuccess(EvalCallback):
                         obs, r, done_flag, info = step_out
                         terminated, truncated = done_flag, False
 
-                    # if info is a list (vectorized), take the first
                     if isinstance(info, (list, tuple)):
                         info = info[0]
 
@@ -97,19 +97,19 @@ class EvalWithSuccess(EvalCallback):
                 lengths.append(ep_len)
                 successes.append(ep_succ)
 
-            mean_r  = float(np.mean(rewards))
-            mean_l  = float(np.mean(lengths))
-            succ_pct= 100.0 * float(np.mean(successes))
+            mean_r   = float(np.mean(rewards))
+            mean_len = float(np.mean(lengths))
+            succ_pct = 100.0 * float(np.mean(successes))
 
             self.logger.record("eval/mean_reward",    mean_r)
-            self.logger.record("eval/mean_ep_length", mean_l)
+            self.logger.record("eval/mean_ep_length", mean_len)
             self.logger.record("eval/success_rate",   succ_pct)
 
             if self.verbose > 0:
                 print(
                     f"Eval @ {self.num_timesteps}: "
                     f"mean_reward={mean_r:.2f}, "
-                    f"mean_length={mean_l:.1f}, "
+                    f"mean_length={mean_len:.1f}, "
                     f"success_rate={succ_pct:.1f}%"
                 )
         return True
@@ -117,7 +117,7 @@ class EvalWithSuccess(EvalCallback):
 eval_env = Monitor(SimpleCarparkEnv(isDiscrete=True, renders=False))
 eval_cb  = EvalWithSuccess(
     eval_env,
-    eval_freq=10_000,                   # every 10k steps
+    eval_freq=1_500,
     n_eval_episodes=10,
     deterministic=True,
     log_path="./carpark_tensorboard/eval",
@@ -126,7 +126,7 @@ eval_cb  = EvalWithSuccess(
 
 # ───────────── Train ────────────────
 model.learn(
-    total_timesteps=100_000,
+    total_timesteps=150_000,
     callback=[success_cb, eval_cb],
     tb_log_name="dqn_with_demos"
 )

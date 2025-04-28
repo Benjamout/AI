@@ -64,7 +64,7 @@ class SimpleCarparkEnv(gym.Env):
                 else:
                     self.barriers.append(Obstacle(self._p, (x, y, slot_z)))
 
-        self._draw_goal_marker(radius=0.3, segments=32)
+        self._draw_goal_marker(radius=0.2, segments=32)
 
         car_pos, _ = self._p.getBasePositionAndOrientation(self.car.car)
         self.prev_dist_to_goal = math.dist(car_pos[:2], self.goal_pos[:2])
@@ -121,17 +121,17 @@ class SimpleCarparkEnv(gym.Env):
 
         # ───── Out-of-bounds termination ─────────────────────
         car_pos, _ = self._p.getBasePositionAndOrientation(self.car.car)
-        oob = not (-3.0 <= car_pos[0] <= 2.0 and -3.0 <= car_pos[1] <= 1.0)
+        oob = not (-3.0 <= car_pos[0] <= 3.0 and -3.0 <= car_pos[1] <= 3.0)
         if oob:
             return np.array(obs, dtype=np.float32), -50, True, False, {"success": False, "oob": True}
 
         # ───── Success: distance & heading tolerance ─────────
         heading_ok = abs(heading_err) < 0.26                # ±15°
-        success    = (dist_to_goal < 0.35) and heading_ok
-        r_goal     = 120 if success else 0
+        success    = (dist_to_goal < 0.2) and heading_ok
+        r_goal     = 150 if success else 0
 
         # ───── Assemble reward & flags ───────────────────────
-        r_step  = -0.02
+        r_step  = -0.1
         reward  = r_prog + r_align + r_step + r_collision + r_goal
 
         self._step_counter += 1
@@ -140,7 +140,7 @@ class SimpleCarparkEnv(gym.Env):
 
         return np.array(obs, dtype=np.float32), reward, terminated, truncated, {"success": success}
 
-    def _draw_goal_marker(self, radius=0.3, segments=32):
+    def _draw_goal_marker(self, radius=0.2, segments=32):
         z = 0.02
         pts = []
         for i in range(segments + 1):

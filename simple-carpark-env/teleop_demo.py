@@ -15,7 +15,7 @@ KEY_ACTION_MAP = {
 
 ESCAPE_KEY = 27  # ASCII code for Esc
 
-def teleop_demo(target_successes=20, max_steps_per_episode=200):
+def teleop_demo(target_successes=30, max_steps_per_episode=200):
     env = SimpleCarparkEnv(isDiscrete=True, renders=True)
     demos = []
     success_count = 0
