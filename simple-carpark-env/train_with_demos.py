@@ -10,8 +10,6 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.callbacks import BaseCallback, EvalCallback
 from simple_carpark.envs.simple_carpark_env import SimpleCarparkEnv
 from stable_baselines3.common.utils import get_linear_fn
-from stable_baselines3.common.buffers import ReplayBuffer
-
 
 # ───────────── Environment & model ─────────────
 env = Monitor(SimpleCarparkEnv(isDiscrete=True, renders=False))
