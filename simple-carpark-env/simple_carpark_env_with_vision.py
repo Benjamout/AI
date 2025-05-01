@@ -36,8 +36,8 @@ class SimpleCarparkEnv(gym.Env):
         self.prev_dist_to_goal = None
         self._dwell_counter    = 0
         self._dwell_threshold  = 5     # require 5 consecutive low-speed steps
-        self._park_lin_tol     = 0.1   # m/s
-        self._park_ang_tol     = 0.1   # rad/s
+        self._park_lin_tol     = 1   # m/s
+        self._park_ang_tol     = 1   # rad/s
 
         self.reset()
 
@@ -153,7 +153,7 @@ class SimpleCarparkEnv(gym.Env):
         r_goal = 150 if parked else 0
 
         # Total reward
-        reward            = r_prog + r_align + slow_bonus - 0.2 + r_collision + r_goal
+        reward            = r_prog + r_align + slow_bonus - 0.5 + r_collision + r_goal
         self._step_counter += 1
         terminated        = parked or collision
         truncated         = self._termination() and not terminated
