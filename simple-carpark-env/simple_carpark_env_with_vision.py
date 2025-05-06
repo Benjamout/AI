@@ -42,7 +42,7 @@ class SimpleCarparkEnv(gym.Env):
                 # 360‑camera params
         self._tile_W, self._tile_H = 256, 256   # per‑tile width / height
         self._cam_height           = 0.3      # metres above robot base
-        self._fov_deg              = .0       # horizontal FOV per tile
+        self._fov_deg              = 90.0       # horizontal FOV per tile
 
 
         self.reset()
@@ -210,7 +210,9 @@ class SimpleCarparkEnv(gym.Env):
             # show each tile in its own window
             for i, t in enumerate(tiles):
                 win = f"Tile {i}"             # Tile 0 = front, 1 = left, etc.
-                cv2.imshow(win, cv2.cvtColor(t, cv2.COLOR_RGB2BGR))
+                t = t.astype(np.uint8)
+                t = cv2.cvtColor(t, cv2.COLOR_RGBA2RGB)
+                cv2.imshow(win, t)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.close()
                 exit(0)
