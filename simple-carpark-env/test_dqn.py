@@ -3,10 +3,10 @@ from simple_carpark.envs.simple_carpark_env import SimpleCarparkEnv
 import time
 
 # ───────────── Load Environment and Model ─────────────
-env = SimpleCarparkEnv(isDiscrete=True, renders=True)
+env = SimpleCarparkEnv(isDiscrete=True, renders=False)
 
 # Load trained model
-model = DQN.load("dqn_carpark_with_demos")
+model = DQN.load("./best_model/dqn_carpark_with_demos")
     
 # ───────────── Run One Test Episode ─────────────
 success_count = 0

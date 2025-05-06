@@ -12,9 +12,9 @@ from simple_carpark.resources.goal     import Goal
 from simple_carpark.resources.obstacle import Obstacle
 
 class SimpleCarparkEnv(gym.Env):
-    metadata = {'render.modes': ['human']}
+    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 30}
 
-    def __init__(self, isDiscrete=True, renders=False):
+    def __init__(self, isDiscrete=True, renders=True):
         # ─── Action & placeholder observation space ────────────
         if isDiscrete:
             self.action_space = gym.spaces.Discrete(9)
@@ -38,6 +38,12 @@ class SimpleCarparkEnv(gym.Env):
         self._dwell_threshold  = 5     # require 5 consecutive low-speed steps
         self._park_lin_tol     = 1   # m/s
         self._park_ang_tol     = 1   # rad/s
+
+                # 360‑camera params
+        self._tile_W, self._tile_H = 256, 256   # per‑tile width / height
+        self._cam_height           = 0.3      # metres above robot base
+        self._fov_deg              = .0       # horizontal FOV per tile
+
 
         self.reset()
 
@@ -195,120 +201,74 @@ class SimpleCarparkEnv(gym.Env):
     def close(self):
         self._p.disconnect()
 
-    # ─── New vision methods ─────────────────────────────────
-    def get_topdown_image(self, width=256, height=256, camera_height=3.0):
-        """
-        Grabs a bird’s-eye RGB image centered on the car.
-        """
-        car_pos, _ = self._p.getBasePositionAndOrientation(self.car.car)
-        eye = [car_pos[0], car_pos[1], camera_height]
-        tgt = [car_pos[0], car_pos[1], 0]
-        up  = [1, 0, 0]
-        view  = p.computeViewMatrix(cameraEyePosition=eye,
-                                    cameraTargetPosition=tgt,
-                                    cameraUpVector=up)
-        proj  = p.computeProjectionMatrixFOV(fov=90, aspect=width/height, nearVal=0.1, farVal=10)
-        # index 2 is the RGB buffer
-        rgb_buf = self._p.getCameraImage(width, height,
-                                         viewMatrix=view,
-                                         projectionMatrix=proj,
-                                         renderer=p.ER_BULLET_HARDWARE_OPENGL)[2]
-        img = np.reshape(rgb_buf, (height, width, 4))[:, :, :3]
-        return img
+    def render(self, mode: str = "human"):
+        assert mode in self.metadata["render_modes"]
 
-    def simulate_lidar_from_image(self,
-                                  image: np.ndarray,
-                                  num_beams: int = 360,
-                                  camera_height: float = 3.0,
-                                  fov_deg: float = 90.0,
-                                  max_range: float = 5.0,
-                                  ignore_car_radius: float = 0.47):
-        """
-        Canny-edge + ray-cast in image space → returns `num_beams` ranges in metres.
-        """
-        gray  = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-        edges = cv2.Canny(gray, 50, 150)
-        H, W  = edges.shape
-        cx, cy = W//2, H//2
+        tiles = self.get_360_image()          # list[ndarray], no stitching
 
-        # compute metres-per-pixel
-        fov     = math.radians(fov_deg)
-        world_h = 2 * camera_height * math.tan(fov/2)
-        world_w = world_h * (W/H)
-        m_per_px = (world_w/W + world_h/H) * 0.5
+        if mode == "human":
+            # show each tile in its own window
+            for i, t in enumerate(tiles):
+                win = f"Tile {i}"             # Tile 0 = front, 1 = left, etc.
+                cv2.imshow(win, cv2.cvtColor(t, cv2.COLOR_RGB2BGR))
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                self.close()
+                exit(0)
 
-        # Mask out car interior
-        ignore_px = int(ignore_car_radius / m_per_px)
-        mask = np.ones_like(edges, dtype=np.uint8)
-        cv2.circle(mask, (cx, cy), ignore_px, 0, -1)
-        edges = edges * mask
+        return tiles    
 
-        angles   = np.linspace(0, 2*math.pi, num_beams, endpoint=False)
-        max_r_px = int(max(W, H)/2)
+    def get_360_image(self, segments: int = 4) -> np.ndarray:
 
-        hits, ranges = [], []
-        for θ in angles:
-            hit = False
-            for r_px in range(max_r_px):
-                x = int(cx + r_px * math.cos(θ))
-                y = int(cy - r_px * math.sin(θ))
-                if x<0 or x>=W or y<0 or y>=H:
-                    break
-                if edges[y, x]:
-                    hits.append((x, y))
-                    ranges.append(r_px * m_per_px)
-                    hit = True
-                    break
-            if not hit:
-                # no edge → max range
-                px = int(cx + max_r_px * math.cos(θ))
-                py = int(cy - max_r_px * math.sin(θ))
-                hits.append((px, py))
-                ranges.append(max_range)
-        return np.array(hits), np.array(ranges, dtype=np.float32)
+        car_pos, car_orn = self._p.getBasePositionAndOrientation(self.car.car)
+        _, _, car_yaw    = p.getEulerFromQuaternion(car_orn)
+
+        eye_z  = car_pos[2] + self._cam_height
+        aspect = self._tile_W / self._tile_H
+        proj   = p.computeProjectionMatrixFOV(
+            fov=self._fov_deg, aspect=aspect, nearVal=0.1, farVal=20.0
+        )
+
+        tiles = []
+        for i in range(segments):
+            yaw = car_yaw + i * (2 * math.pi / segments)  # 0°, 90°, 180°, 270°
+            fwd = (math.cos(yaw), math.sin(yaw))
+            eye = [car_pos[0],          car_pos[1],          eye_z]
+            tgt = [car_pos[0] + fwd[0], car_pos[1] + fwd[1], eye_z]
+            up  = [0, 0, 1]
+
+            view = p.computeViewMatrix(eye, tgt, up)
+            rgb  = self._p.getCameraImage(
+                self._tile_W, self._tile_H,
+                viewMatrix=view,
+                projectionMatrix=proj,
+                renderer=(
+                    p.ER_BULLET_HARDWARE_OPENGL
+                    if self._renders           # env started in GUI mode
+                    else p.ER_TINY_RENDERER    # CPU renderer for DIRECT mode
+                )
+            )[2]
+            tile = np.reshape(rgb, (self._tile_H, self._tile_W, 4))[:, :, :3]
+            tiles.append(tile)
+
+        return tiles
+
 
 
 # ─── Demo usage at end of file ──────────────────────────
 if __name__ == "__main__":
     env = SimpleCarparkEnv(isDiscrete=True, renders=False)
     obs, _ = env.reset()
-    env.step(env.action_space.sample())
 
-    # 1) Capture top-down
-    td_img = env.get_topdown_image(width=512, height=512)
+    done = False
+    while not done:
+        env.render(mode="human")          # live panorama window
+        action = env.action_space.sample()  # random drive
+        obs, reward, done, _, info = env.step(action)
+        
+        
+        # done = True
 
-    # 2) Edge map
-    edges = cv2.Canny(cv2.cvtColor(td_img, cv2.COLOR_RGB2GRAY), 50, 150)
-
-    # 3) Simulate LiDAR
-    hits, ranges = env.simulate_lidar_from_image(td_img,
-                                                num_beams=360,
-                                                max_range=5.0)
-
-    # 5) New—Scatter-only LiDAR overlay, skipping max-range points
-    overlay = td_img.copy()
-    for (x, y), r in zip(hits, ranges):
-        if r < 5.0:  # only draw real hits
-            cv2.circle(overlay, (int(x), int(y)), radius=3, color=(0,255,0), thickness=-1)
-
-    # Top-Down
-    cv2.namedWindow("Top-Down View", cv2.WINDOW_NORMAL)
-    cv2.resizeWindow("Top-Down View", 700, 700)
-    cv2.imshow("Top-Down View", td_img)
-
-    # Edge Map
-    cv2.namedWindow("Edge Map", cv2.WINDOW_NORMAL)
-    cv2.resizeWindow("Edge Map", 700, 700)
-    cv2.imshow("Edge Map", edges)
-
-    # LiDAR Overlay
-    cv2.namedWindow("LiDAR Hits Overlay", cv2.WINDOW_NORMAL)
-    cv2.resizeWindow("LiDAR Hits Overlay", 700, 700)
-    cv2.imshow("LiDAR Hits Overlay", overlay)
-
-
-    print("Ranges (m):", np.round(ranges, 2))
-    print("Press any key in the windows to exit.")
+    env.close()
+    
     cv2.waitKey(0)
     cv2.destroyAllWindows()
-
