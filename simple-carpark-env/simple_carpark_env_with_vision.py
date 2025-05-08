@@ -204,23 +204,25 @@ class SimpleCarparkEnv(gym.Env):
     def render(self, mode: str = "human"):
         assert mode in self.metadata["render_modes"]
 
-        tiles = self.get_360_image()          # list[ndarray], no stitching
+        tiles = self.get_360_image()  # list[ndarray], no stitching
+        
+        # Convert tiles to uint8 and RGB format
+        tiles = [t.astype(np.uint8) for t in tiles]
+        tiles = [cv2.cvtColor(t, cv2.COLOR_RGBA2RGB) for t in tiles]
+        
+        # Stitch tiles horizontally into one panoramic image
+        panorama = np.hstack(tiles)
 
         if mode == "human":
-            # show each tile in its own window
-            for i, t in enumerate(tiles):
-                win = f"Tile {i}"             # Tile 0 = front, 1 = left, etc.
-                t = t.astype(np.uint8)
-                t = cv2.cvtColor(t, cv2.COLOR_RGBA2RGB)
-                cv2.imshow(win, t)
+            # Show single panoramic window
+            cv2.imshow("360° View", panorama)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 self.close()
                 exit(0)
 
-        return tiles    
-
+        return panorama
+    
     def get_360_image(self, segments: int = 4) -> np.ndarray:
-
         car_pos, car_orn = self._p.getBasePositionAndOrientation(self.car.car)
         _, _, car_yaw    = p.getEulerFromQuaternion(car_orn)
 
@@ -230,9 +232,16 @@ class SimpleCarparkEnv(gym.Env):
             fov=self._fov_deg, aspect=aspect, nearVal=0.1, farVal=20.0
         )
 
+        # Define the yaw angles for each segment (in order: front, left, right, back)
+        yaw_angles = [
+            car_yaw,                    # Front (0°)
+            car_yaw + math.pi/2,       # Left (90°)
+            car_yaw + math.pi*3/2,     # Right (270°) - Swapped with back
+            car_yaw + math.pi,         # Back (180°) - Swapped with right
+        ]
+
         tiles = []
-        for i in range(segments):
-            yaw = car_yaw + i * (2 * math.pi / segments)  # 0°, 90°, 180°, 270°
+        for yaw in yaw_angles:
             fwd = (math.cos(yaw), math.sin(yaw))
             eye = [car_pos[0],          car_pos[1],          eye_z]
             tgt = [car_pos[0] + fwd[0], car_pos[1] + fwd[1], eye_z]
@@ -253,7 +262,6 @@ class SimpleCarparkEnv(gym.Env):
             tiles.append(tile)
 
         return tiles
-
 
 
 # ─── Demo usage at end of file ──────────────────────────
