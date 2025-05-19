@@ -16,10 +16,10 @@
 ```bash
   python3 train_dqn.py
 ```
-By default this will:
- • run DQN for 10 000 steps
- • log TensorBoard data under ./carpark_tensorboard/
- • save the model as dqn_carpark_minimal.zip
+By default this will:  
+ • run DQN for 10 000 steps  
+ • log TensorBoard data under ./carpark_tensorboard/  
+ • save the model as dqn_carpark_minimal.zip  
 
 In a separate shell, launch TensorBoard to monitor training:
 ```bash
