@@ -32,7 +32,7 @@ Then point your browser at:
 ```
 You’ll see “episode_reward” and “episode_success” curves.
 
-## Once training is done, test/run the learned policy:  
+## Test the learned policy:  
 ```bash
   python3 test_dqn.py
 ```
