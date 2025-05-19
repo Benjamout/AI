@@ -1,8 +1,17 @@
 # AI Group Assignment - Parralel Parking Agent
 
-To install all necessary libraries: 
-  pip install -r requirements.txt
+## Group Information
+### Group Compositon
+-Benjamin Pedler  
+-Connor Mawer   
+-Isaac Poulson    
 
+##Install Info
+```bash
+  pip install -r requirements.txt
+```
+
+##Operation
 By default this will:
  • run DQN for 10 000 steps
  • log TensorBoard data under ./carpark_tensorboard/
