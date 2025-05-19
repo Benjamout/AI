@@ -21,12 +21,12 @@ By default this will:
  • log TensorBoard data under ./carpark_tensorboard/  
  • save the model as dqn_carpark_minimal.zip  
 
-In a separate shell, launch TensorBoard to monitor training:
+In a separate terminal shell, launch TensorBoard to monitor training:
 ```bash
   tensorboard --logdir ./carpark_tensorboard/
 ```
 
-Then point your browser at:
+Point your browser to:
 ```bash
   http://localhost:6006
 ```
