@@ -1,21 +1,7 @@
-# AI
+# AI Group Assignment - Parralel Parking Agent
 
-  pip install gymnasium
-  pip install numpy
-
-the simulator
-  pip install pybullet        
-  
-deep‐RL algorithm
-  pip install torch
-  pip install stable-baselines3
-
-logging & visualization
-  pip install tensorboard
-
-
-Train the agent
-  python3 train_dqn.py
+To install all necessary libraries: 
+  pip install -r requirements.txt
 
 By default this will:
  • run DQN for 10 000 steps
