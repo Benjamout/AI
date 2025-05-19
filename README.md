@@ -6,12 +6,12 @@
 -Connor Mawer   
 -Isaac Poulson    
 
-##Install Info
+## Install Info  
 ```bash
   pip install -r requirements.txt
 ```
 
-##Operation
+## Operation  
 By default this will:
  • run DQN for 10 000 steps
  • log TensorBoard data under ./carpark_tensorboard/
@@ -24,5 +24,5 @@ Then point your browser at:
   http://localhost:6006
 You’ll see “episode_reward” and “episode_success” curves.
 
-# Once training is done, test/run the learned policy:
+## Once training is done, test/run the learned policy:  
 python3 test_dqn.py
