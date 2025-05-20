@@ -3,14 +3,14 @@ from simple_carpark.envs.simple_carpark_env import SimpleCarparkEnv
 import time
 
 # ───────────── Load Environment and Model ─────────────
-env = SimpleCarparkEnv(isDiscrete=True, renders=False)
+env = SimpleCarparkEnv(isDiscrete=True, renders=True)
 
 # Load trained model
 model = DQN.load("./best_model/dqn_carpark_with_demos")
     
 # ───────────── Run One Test Episode ─────────────
 success_count = 0
-for i in range(100):
+for i in range(1000):
     obs, _ = env.reset()
     done = False
     step_count = 0
@@ -26,4 +26,4 @@ for i in range(100):
     if info.get("success", True): success_count += 1
 
 env.close()
-print(f"Success rate: {success_count / 100:.2%}")
+print(f"Success rate: {success_count / 1000:.2%}")
