@@ -4,4 +4,7 @@ dist/
 *.egg-info/
 *.npy
 *.pyc
+.DS_store
+.idea
+
 
