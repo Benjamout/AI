@@ -109,7 +109,7 @@
 <section class="hero teaser">
   <div class="container is-max-desktop">
     <div class="hero-body">
-      <img src="./static/images/teaser.png"
+      <img src="./static/images/Intro.png"
             class="teaser-image"
             alt="Teaser."/>
       <h2 class="subtitle has-text-centered">
@@ -220,8 +220,58 @@
         </div>
       </div>
     </div>
+    <div class="columns is-centered">
+      <div class="column is-full has-text-centered">
+        <figure class="image">
+          <img src="./static/images/rewards.png" alt="Rewards" style="max-width: 100%; width: 900px; height: auto;">
+        </figure>
+        <p class="is-size-6 mt-2">Rewards used to train the model.</p>
+      </div>
+    </div>
   </div>
 </section>
+
+<!-- Training -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Training</h2>
+        <div class="content has-text-justified">
+          <p>
+            The system was trained using a Deep Q-Network (DQN) algorithm from the Stable Baselines3 library. 
+            This method combines Q-learning with deep neural networks, and was chosen due to the discrete action space and continuous state space of the task.
+          </p>
+
+          <p>
+            The training setup involved the following components:
+          </p>
+          <ul>
+            <li>A custom Gymnasium environment called <code>SimpleCarparkEnv</code>.</li>
+            <li>Vectorized training with <code>DummyVecEnv</code> using 4 parallel environments for improved sample efficiency.</li>
+            <li>A linear learning rate schedule starting from 1e-3 and decaying to 1e-5 over 100,000 timesteps.</li>
+            <li>Reward and success metrics logged using a custom <code>RewardLoggingCallback</code> into TensorBoard.</li>
+            <li>Final model saved after 100,000 total timesteps of training.</li>
+          </ul>
+
+          <p>
+            Once training completed, the agent was is visualised in a rendered environment using the learned policy.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="columns is-centered">
+      <div class="column is-full has-text-centered">
+        <figure class="image">
+          <img src="./static/images/BirdsEyesTraining.png" alt="TensorBoard Evaluation Metrics" style="max-width: 100%; width: 900px; height: auto;">
+        </figure>
+        <p class="is-size-6 mt-2">Gymnasium visualization of training of the model executing its policy.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 
 <!-- Evaluation Metrics -->
 <section class="section">
@@ -262,58 +312,60 @@
 
     <div class="columns is-centered">
 
-      <!-- Visual Effects. -->
-      <div class="column">
-        <div class="content">
-          <h2 class="title is-3">CNN evaluation</h2>
-          <p>
-            Confusion matrix of the CNN evaluation on the test set.
-          </p>
-
-          <img src="./static/images/results/confusion_matrix_seaborn.png"
-            class="teaser-image"
-            alt="Teaser."/>
-        </div>
-      </div>
-      <!--/ Visual Effects. -->
-
-      <!-- Matting. -->
-      <div class="column">
-        <h2 class="title is-3">DQN training</h2>
-        <div class="columns is-centered">
-          <div class="column content">
-            <p>
-              Sample of the reward convergence plot of the DQN training.
-            </p>
-            <img src="./static/images/results/reward_convergence_plot.png"
-            class="teaser-image"
-            alt="Teaser."/>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!--/ Matting. -->
-
-
-
-
     <!-- Concurrent Work. -->
     <div class="columns is-centered">
       <div class="column is-full-width">
-        <h2 class="title is-3">Results discussion and reflection</h2>
+        <h2 class="title is-3">Results</h2>
 
         <div class="content has-text-justified">
           <p>
-            This is a sample text to show how the results discussion and reflection would look like in your own project. You can use this space to describe the main results obtained, the limitations of your work, and the future work that could be done.
+            Currently the system is able to park the car in a designated parking space while avoiding obstacles. The DQN agent succsfully navigates the environment and make decisions based on the rewards it receives. 
           </p>
           <p>
-            Orem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+            Across 1000 episodes, the DQN agent achieved a success rate of 100%, demonstrating its ability to consistently park the car in the designated space without collisions. 
           </p>
         </div>
       </div>
     </div>
     <!--/ Concurrent Work. -->
+  </div>
+</section>
 
+<!-- How to Run -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">How to Run</h2>
+        <div class="content has-text-justified">
+
+          <h4 class="title is-4">Install Info</h4>
+          <pre><code>pip install -r requirements.txt</code></pre>
+
+          <h4 class="title is-4">Operation</h4>
+          <h5 class="subtitle is-5">Training</h5>
+          <pre><code>python3 train_dqn.py</code></pre>
+          <p>By default this will:</p>
+          <ul>
+            <li>Run DQN for 100,000 steps</li>
+            <li>Log TensorBoard data under <code>./carpark_tensorboard/</code></li>
+            <li>Save the model as <code>dqn_carpark_minimal.zip</code></li>
+          </ul>
+
+          <p>In a separate terminal shell, launch TensorBoard to monitor training:</p>
+          <pre><code>tensorboard --logdir ./carpark_tensorboard/</code></pre>
+
+          <p>Then open your browser and navigate to:</p>
+          <pre><code>http://localhost:6006</code></pre>
+
+          <p>You’ll see <code>episode_reward</code> and <code>episode_success</code> curves.</p>
+
+          <h5 class="subtitle is-5">Test the Learned Policy</h5>
+          <pre><code>python3 test_dqn.py</code></pre>
+
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
