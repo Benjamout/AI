@@ -236,17 +236,27 @@
             <li>8: Forward-left</li>
           </ul>
 
-          <!-- Training Parameters -->
-          <h4 class="title is-4">Key Parameters</h4>
-          <ul>
-            <li>Learning Rate: Linear schedule from 1e-3 to 1e-5</li>
-            <li>Buffer Size: 100,000 transitions</li>
-            <li>Batch Size: 64</li>
-            <li>Discount Factor (γ): 0.99</li>
-            <li>Target Network Update: Every 5,000 steps</li>
-            <li>Exploration Strategy: ε-greedy with decay</li>
-            <li>Training Steps: 100,000</li>
-          </ul>
+            <!-- Training Parameters -->
+            <h4 class="title is-4">Key Parameters</h4>
+            <ul>
+              <li>Learning Rate: Fixed at 1e-3</li>
+              <li>Buffer Size: 150,000 transitions</li>
+              <li>Exploration Fraction: 0.9</li>
+              <li>Final Exploration Epsilon: 0.2</li>
+              <li>Training Frequency: Every 4 steps</li>
+              <li>Target Network Update: Every 30,000 steps</li>
+              <li>Max Gradient Norm: 10</li>
+              <li>Total Training Steps: 200,000</li>
+            </ul>
+
+                        <!-- Additional Features -->
+            <h4 class="title is-4">Training Features</h4>
+            <ul>
+              <li>Demo-based Learning: Replay buffer seeded with demonstration data</li>
+              <li>Custom Success Rate Tracking: Logs success rate every 20 episodes</li>
+              <li>Evaluation Callback: Performs evaluation every 2,000 steps with 10 episodes</li>
+              <li>Best Model Checkpointing: Saves best performing model during training</li>
+            </ul>
         </div>
       </div>
     </div>
@@ -302,7 +312,7 @@
           <ul>
             <li>A custom Gymnasium environment called <code>SimpleCarparkEnv</code>.</li>
             <li>Vectorized training with <code>DummyVecEnv</code> using 4 parallel environments for improved sample efficiency.</li>
-            <li>A linear learning rate schedule starting from 1e-3 and decaying to 1e-5 over 100,000 timesteps.</li>
+            <li>A fixed learning rate of 1e-3 over 100,000 timesteps.</li>
             <li>Reward and success metrics logged using a custom <code>RewardLoggingCallback</code> into TensorBoard.</li>
             <li>Final model saved after 100,000 total timesteps of training.</li>
           </ul>
