@@ -283,27 +283,59 @@
         <h2 class="title is-3">Evaluation Metrics</h2>
         <div class="content has-text-justified">
           <p>
-            Evaluation metrics were visualized throughout training to monitor model performance and improvements. The system utilised TensorBoard to track a range of metrics:
+            Evaluation metrics were visualized throughout training to monitor model performance and improvements. Key metrics include episode length, rewards, and success rates. These were logged via TensorBoard.
           </p>
-          <ul>
-            <li>Episode Length</li>
-            <li>Episode Reward</li>
-            <li>Exploration Rate</li>
-            <li>Success Rate</li>
-            <li>FPS (Frames per Second)</li>
-            <li>Learning Rate</li>
-            <li>Loss</li>
-          </ul>
         </div>
       </div>
     </div>
 
-    <div class="columns is-centered">
+    <div class="columns is-multiline is-centered">
+      <!-- ep_len_mean.png -->
       <div class="column is-full has-text-centered">
-        <figure class="image">
-          <img src="./static/images/Learning_Visualisation.png" alt="TensorBoard Evaluation Metrics" style="max-width: 100%; width: 900px; height: auto;">
+        <figure class="image is-inline-block" style="max-width: 800px;">
+          <img src="./static/images/ep_len_mean.png" alt="Episode Length Mean">
+          <figcaption class="has-text-centered is-size-6 mt-2">ep_len_mean</figcaption>
         </figure>
-        <p class="is-size-6 mt-2">Example TensorBoard graphs showing training performance.</p>
+      </div>
+
+      <!-- ep_rew_mean.png -->
+      <div class="column is-full has-text-centered">
+        <figure class="image is-inline-block" style="max-width: 800px;">
+          <img src="./static/images/ep_rew_mean.png" alt="Episode Reward Mean">
+          <figcaption class="has-text-centered is-size-6 mt-2">ep_rew_mean</figcaption>
+        </figure>
+      </div>
+
+      <!-- mean_ep_length.png -->
+      <div class="column is-full has-text-centered">
+        <figure class="image is-inline-block" style="max-width: 800px;">
+          <img src="./static/images/mean_ep_length.png" alt="Mean Episode Length">
+          <figcaption class="has-text-centered is-size-6 mt-2">mean_ep_length</figcaption>
+        </figure>
+      </div>
+
+      <!-- mean_reward.png -->
+      <div class="column is-full has-text-centered">
+        <figure class="image is-inline-block" style="max-width: 800px;">
+          <img src="./static/images/mean_reward.png" alt="Mean Reward">
+          <figcaption class="has-text-centered is-size-6 mt-2">mean_reward</figcaption>
+        </figure>
+      </div>
+
+      <!-- success_rate.png -->
+      <div class="column is-full has-text-centered">
+        <figure class="image is-inline-block" style="max-width: 800px;">
+          <img src="./static/images/success_rate.png" alt="Success Rate">
+          <figcaption class="has-text-centered is-size-6 mt-2">success_rate</figcaption>
+        </figure>
+      </div>
+
+      <!-- rollout:success_rate.png -->
+      <div class="column is-full has-text-centered">
+        <figure class="image is-inline-block" style="max-width: 800px;">
+          <img src="./static/images/rollout:success_rate.png" alt="Rollout Success Rate">
+          <figcaption class="has-text-centered is-size-6 mt-2">rollout:success_rate</figcaption>
+        </figure>
       </div>
     </div>
   </div>
