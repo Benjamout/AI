@@ -202,6 +202,56 @@
   </div>
 </section>
 
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Model Architecture</h2>
+        <div class="content has-text-justified">
+          <p>
+            The Deep Q-Network (DQN) architecture consists of the following components:
+          </p>
+          
+          <!-- Architecture Details -->
+          <h4 class="title is-4">Network Structure</h4>
+          <ul>
+            <li>Input Layer: State space representation</li>
+            <li>Hidden Layers: Two fully connected layers with 64 neurons each</li>
+            <li>Activation Function: ReLU</li>
+            <li>Output Layer: 9 actions (discrete action space)</li>
+          </ul>
+
+          <!-- Action Space -->
+          <h4 class="title is-4">Action Space</h4>
+          <ul>
+            <li>0: Reverse-Left</li>
+            <li>1: Reverse</li> 
+            <li>2: Reverse-Right</li>
+            <li>3: Steer-Left (no throttle)</li>
+            <li>4: No throttle and no steering</li>
+            <li>5: Steer-Right (no throttle)</li>
+            <li>6: Forward-right</li>
+            <li>7: Forward</li>
+            <li>8: Forward-left</li>
+          </ul>
+
+          <!-- Training Parameters -->
+          <h4 class="title is-4">Key Parameters</h4>
+          <ul>
+            <li>Learning Rate: Linear schedule from 1e-3 to 1e-5</li>
+            <li>Buffer Size: 100,000 transitions</li>
+            <li>Batch Size: 64</li>
+            <li>Discount Factor (γ): 0.99</li>
+            <li>Target Network Update: Every 5,000 steps</li>
+            <li>Exploration Strategy: ε-greedy with decay</li>
+            <li>Training Steps: 100,000</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- Environment and Reward Generation -->
 <section class="section">
   <div class="container is-max-desktop">
